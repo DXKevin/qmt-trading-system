@@ -4,6 +4,9 @@ def parse_stock_fund_string(s: str) -> dict:
     解析格式如 "<000001.SZ#23123213,23123123>" 的字符串，
     返回字典：{ 股票代码: [资金账号1, 资金账号2, ...] }
     """
+    if "HeartBeat" in s:
+        return {}
+    
     # 去除首尾的 < 和 >
     s = s.strip()
     if s.startswith('<') and s.endswith('>'):

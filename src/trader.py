@@ -50,6 +50,8 @@ class TraderExecutor:
         if account_id not in self.accounts:
             account = Account(account_id, account_type).get_account()
             self.accounts[account_id] = account
+            
+            self.logger.info(f"创建新账户对象: {account_id} 类型: {account_type}")
         return self.accounts[account_id]
     
     def run(self):
@@ -61,7 +63,7 @@ class TraderExecutor:
         while True:
             message = self.msg_queue.get()
             parsed_message = parse_stock_fund_string(message)
-            
+
             for stock_code, fund_accounts in parsed_message.items():
                 for fund_account in fund_accounts:
                     account = self.get_account(fund_account, "STOCK")

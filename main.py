@@ -23,8 +23,8 @@ if __name__ == "__main__":
     
     trader = Trader(path, logger).connect()
     
-    if trader is None:
-        raise Exception("交易客户端连接失败，程序退出")
+    # if trader is None:
+    #     raise Exception("交易客户端连接失败，程序退出")
     
     # 启动管道接收服务
     msg_queue = queue.Queue()
