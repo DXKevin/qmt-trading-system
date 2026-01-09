@@ -7,33 +7,34 @@ sys.path.append('./src')
 
 from reveiver_server import ReceiverServer
 from trader import Trader
-from trader import Account
 from trader import TraderExecutor
+from trader import Account
 from logger import SimpleLogger
-from utils import parse_stock_fund_string
-
 
 logger = SimpleLogger(keep_days=5)
 
 if __name__ == "__main__":
     # 连接交易客户端
-    path = r'D:\山西证券QMT交易端-模拟\userdata_mini'
-    account_id = "11031122"
-    account_type = "STOCK"
-    
+    path = r'D:\国金QMT交易端模拟\userdata_mini'
+
     trader = Trader(path, logger).connect()
     
-    # if trader is None:
-    #     raise Exception("交易客户端连接失败，程序退出")
+    if trader is None:
+        raise Exception("交易客户端连接失败，程序退出")
     
-    # 启动管道接收服务
-    msg_queue = queue.Queue()
-    pipe_name = "\\\\.\\pipe\\to_python_pipe"
-    ReceiverServer(pipe_name, msg_queue).run()
+    order_id = 1098922992
+    acc = Account('40079077', 'STOCK').get_account()
+    trader.cancel_order_stock(acc, order_id)
+
     
-    # 启动消息处理循环
-    executor = TraderExecutor(trader, logger, msg_queue)
-    executor.run()
+    # # 启动管道接收服务
+    # msg_queue = queue.Queue()
+    # pipe_name = "\\\\.\\pipe\\to_python_pipe"
+    # ReceiverServer(pipe_name, msg_queue).run()
+    
+    # # 启动消息处理循环
+    # executor = TraderExecutor(trader, logger, msg_queue)
+    # executor.run()
     
     
     

@@ -5,11 +5,9 @@ __version__ = "xtquant"
 
 def check_for_update(package_name):
     import requests
-    import importlib.metadata as metadata
-    # from pkg_resources import get_distribution
+    from pkg_resources import get_distribution
     # 获取当前安装的版本
-    # current_version = get_distribution(package_name).version
-    current_version = metadata.version(package_name)
+    current_version = get_distribution(package_name).version
     # 查询PyPI的API获取最新版本信息
     response = requests.get(f"https://pypi.org/pypi/{package_name}/json", timeout = 10)
     if response.status_code == 200:
