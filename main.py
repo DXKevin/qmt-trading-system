@@ -5,26 +5,31 @@ import queue
 sys.path.append('./scripts')
 sys.path.append('./src')
 
+from read_config_ini import read_config
 from reveiver_server import ReceiverServer
 from trader import Trader
 from trader import TraderExecutor
 from trader import Account
 from logger import SimpleLogger
 
+
 logger = SimpleLogger(keep_days=5)
 
 if __name__ == "__main__":
-    # 连接交易客户端
-    path = r'D:\国金QMT交易端模拟\userdata_mini'
-
-    trader = Trader(path, logger).connect()
+    # 读取配置文件
+    config_path = 'config.ini'
+    cfg = read_config(config_path)
     
+    # 连接交易客户端
+    path = cfg['CLIENT']['path']
+    trader = Trader(path, logger).connect()
+
     if trader is None:
         raise Exception("交易客户端连接失败，程序退出")
 
     # 启动管道接收服务
     msg_queue = queue.Queue()
-    pipe_name = "\\\\.\\pipe\\to_python_pipe"
+    pipe_name = cfg['MESSAGE SERVER']['pipe_name']
     ReceiverServer(pipe_name, msg_queue).run()
     
     # 启动消息处理循环
