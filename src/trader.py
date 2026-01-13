@@ -29,7 +29,7 @@ class Trader:
         else:
             self.logger.info('连接交易客户端失败')
             return None
-        
+    
 class Account:
     def __init__(self, account_id, account_type):
         self.account_id = account_id
@@ -54,6 +54,14 @@ class TraderExecutor:
             self.logger.info(f"创建新账户对象: {account_id} 类型: {account_type}")
         return self.accounts[account_id]
     
+    def query_stock_orders(self, account, only_undone):
+        orders = self.trader.query_stock_orders(account, only_undone)
+        return orders
+        
+    def cancel_order_stocks(self, account, order_id):
+        result = self.trader.cancel_order_stock(account, order_id)
+        return result
+    
     def run(self):
         thread = threading.Thread(target=self.worker)
         thread.start()
@@ -67,9 +75,14 @@ class TraderExecutor:
             for stock_code, fund_accounts in parsed_message.items():
                 for fund_account in fund_accounts:
                     account = self.get_account(fund_account, "STOCK")
+                    orders = self.query_stock_orders(account, True)
+                    for order in orders:
+                        if order.stock_code == stock_code:
+                            cancel_result = self.cancel_order_stocks(account, order.order_id)
+                            self.logger.info(f"取消订单结果: 账户 {fund_account} 股票代码 {stock_code} 订单号 {order.order_id} 结果 {cancel_result}")
                     
-                    positions = self.trader.query_stock_positions(account)
-                    position_dict = {i.stock_code: i.m_nCanUseVolume for i in positions}
-                    self.logger.info(f"处理股票代码 {stock_code}，资金账号 {fund_account}, 可用持仓: {position_dict.get(stock_code, 0)}")
                     
+                    
+    
+           
 

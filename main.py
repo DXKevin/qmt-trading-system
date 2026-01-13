@@ -21,24 +21,16 @@ if __name__ == "__main__":
     
     if trader is None:
         raise Exception("交易客户端连接失败，程序退出")
-    
-    order_id = 1098922992
-    acc = Account('40079077', 'STOCK').get_account()
-    trader.cancel_order_stock(acc, order_id)
 
+    # 启动管道接收服务
+    msg_queue = queue.Queue()
+    pipe_name = "\\\\.\\pipe\\to_python_pipe"
+    ReceiverServer(pipe_name, msg_queue).run()
     
-    # # 启动管道接收服务
-    # msg_queue = queue.Queue()
-    # pipe_name = "\\\\.\\pipe\\to_python_pipe"
-    # ReceiverServer(pipe_name, msg_queue).run()
+    # 启动消息处理循环
+    executor = TraderExecutor(trader, logger, msg_queue)
+    executor.run()
     
-    # # 启动消息处理循环
-    # executor = TraderExecutor(trader, logger, msg_queue)
-    # executor.run()
-    
-    
-    
-
     # account_info = trader.query_stock_asset(acc)
     # positions = trader.query_stock_positions(acc)
     
@@ -46,3 +38,21 @@ if __name__ == "__main__":
     # position_available_dict = {i.stock_code : i.m_nCanUseVolume for i in positions}
     # print(acc.account_id, '持仓字典', position_total_dict)  # type: ignore
     # print(acc.account_id, '可用持仓字典', position_available_dict) # type: ignore
+    
+    
+    
+    
+    
+    
+    
+    # order_id = 1098922992
+    # acc = Account('40079077', 'STOCK').get_account()
+    # # trader.cancel_order_stock(acc, order_id)
+
+    # orders = trader.query_stock_orders(acc, False)
+    
+    # for order in orders:
+    #     print(order.stock_code)
+    #     print(order.order_id)
+        
+    #     print(trader.cancel_order_stock(acc, order.order_id))
