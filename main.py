@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # 启动管道接收服务
     msg_queue = queue.Queue()
     pipe_name = cfg['MESSAGE SERVER']['pipe_name']
-    ReceiverServer(pipe_name, msg_queue).run()
+    ReceiverServer(pipe_name, logger, msg_queue).run()
     
     # 启动消息处理循环
     executor = TraderExecutor(trader, logger, msg_queue)

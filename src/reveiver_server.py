@@ -6,8 +6,9 @@ import threading
 
 
 class ReceiverServer():
-    def __init__(self, pipe_name, msg_queue):
+    def __init__(self, pipe_name, logger, msg_queue):
         self.pipe_name = pipe_name
+        self.logger = logger
         self.msg_queue = msg_queue
     
     def run(self):
@@ -33,18 +34,18 @@ class ReceiverServer():
                     None  # 模板文件句柄
                 )
                 
-                print(f"成功连接到管道 {self.pipe_name}")
+                self.logger.info(f"成功连接到管道 {self.pipe_name}")
                 return handle
             except Exception as e:
                 # ERROR_PIPE_BUSY 通常意味着服务器端存在，但正忙
                 if e.args[0] == 2: # ERROR_FILE_NOT_FOUND, 表示管道不存在
-                    print(f"等待服务器启动... 管道 {self.pipe_name} 不存在。")
+                    self.logger.info(f"等待服务器启动... 管道 {self.pipe_name} 不存在。")
                 elif e.args[0] == 231: # ERROR_PIPE_BUSY, 表示管道存在但忙
-                    print("管道正忙，等待客户端...")
+                    self.logger.info("管道正忙，等待客户端...")
                     win32pipe.WaitNamedPipe(self.pipe_name, 5000) # 等待最多5秒
                     continue # 再次尝试连接
                 else:
-                    print(f"连接失败: {e}")
+                    self.logger.error(f"连接失败: {e}")
                     sys.exit(1)
                 time.sleep(1) # 等待一秒后重试
 
@@ -59,19 +60,19 @@ class ReceiverServer():
                 if result == 0: # 读取成功
                     message = data.decode('utf-8')
                     self.msg_queue.put(message)
-                    print(f"收到消息: {message}\n")
+                    self.logger.info(f"收到消息: {message}\n")
                     # 可以在这里处理消息
                     # 如果服务器发送完消息后关闭，客户端会收到空数据
                     if not message:
-                        print("服务器已关闭连接。")
+                        self.logger.info("服务器已关闭连接。")
                         break
                 else:
                     # 如果 ReadFile 返回非零值，表示有错误
-                    print(f"读取错误: {result}")
+                    self.logger.error(f"读取错误: {result}")
                     break
             except Exception as e:
                 # 通常当服务器关闭管道时，这里会抛出异常
-                print(f"连接中断或发生错误: {e}")
+                self.logger.error(f"连接中断或发生错误: {e}")
                 break
 
 
@@ -92,6 +93,6 @@ class ReceiverServer():
 
 if __name__ == "__main__":
     pipe_name = "\\\\.\\pipe\\to_python_pipe"
-    ReceiverServer(pipe_name).run()
+    ReceiverServer(pipe_name, logger, msg_queue).run()
     
     print("Receiver Server is running.")
